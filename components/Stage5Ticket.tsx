@@ -14,48 +14,74 @@ export default function Stage5Ticket() {
         try {
             setIsDownloading(true);
 
-            // 0. Wait for fonts to be ready
+            // 0. Wait for fonts
             await document.fonts.ready;
 
-            // 0.5. Small delay for any paint operations
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            // 1. Create a clone for specific capturing dimensions
+            const originalElement = ticketRef.current;
+            const clone = originalElement.cloneNode(true) as HTMLElement;
 
-            // Get exact dimensions of the element to ensure full capture
-            const { offsetWidth, offsetHeight } = ticketRef.current;
+            // 2. Wrap it in a container that forces browser rendering but hides it from user
+            // using opacity: 0 instead of display: none or massive negative offsets
+            const container = document.createElement("div");
+            container.style.position = "fixed";
+            container.style.top = "0";
+            container.style.left = "0";
+            container.style.width = "800px"; // Force desktop width
+            container.style.zIndex = "-9999";
+            container.style.opacity = "0";
+            container.style.pointerEvents = "none";
+            container.style.backgroundColor = "#ffffff";
 
-            // 1. Capture using modern-screenshot
-            // It often handles modern CSS and foreign objects better than html-to-image
-            const imgData = await domToPng(ticketRef.current, {
-                scale: 2, // High resolution
+            // Basic reset for the clone to ensure it fills the container
+            clone.style.width = "100%";
+            clone.style.height = "auto";
+            clone.style.transform = "none";
+
+            container.appendChild(clone);
+            document.body.appendChild(container);
+
+            // 3. Wait for paint
+            await new Promise((resolve) => setTimeout(resolve, 250));
+
+            // 4. Capture using modern-screenshot
+            // We capture the CLONE (which is inside the fixed width container)
+            const imgData = await domToPng(clone, {
+                scale: 2,
                 backgroundColor: "#ffffff",
-                width: offsetWidth,
-                height: offsetHeight,
                 style: {
-                    backgroundColor: "#ffffff", // Force white background
+                    transform: 'scale(1)',
                 }
             });
 
-            // 2. Initialize PDF
+            // 5. Cleanup DOM immediately
+            document.body.removeChild(container);
+
+            // 6. Generate PDF
+            // A4 dimensions in px at 72dpi: ~595 x 842. 
+            // We use 'px' unit in jsPDF for easier mapping.
             const pdf = new jsPDF({
                 orientation: "portrait",
                 unit: "px",
                 format: "a4"
             });
 
-            // 3. Calculate scaling to fit PDF width
-            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfWidth = pdf.internal.pageSize.getWidth(); // approx 595px if unit is 'px'? Wait, default is different.
+            // Let's rely on standard A4 width
 
-            // Scale image to fit the PDF width, maintaining aspect ratio
-            const ratio = pdfWidth / offsetWidth;
-            const imgHeightInPdf = offsetHeight * ratio;
+            // Calculate aspect ratio from the captured element (which was 800px wide)
+            const imgProps = (pdf as any).getImageProperties(imgData);
+            const r = imgProps.width / imgProps.height;
 
-            // 4. Add image to PDF
-            pdf.addImage(imgData, "PNG", 0, 20, pdfWidth, imgHeightInPdf);
+            // Fit width to PDF page
+            const pdfHeight = pdfWidth / r;
+
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
             pdf.save("Valentine_Event_Order_2026.pdf");
 
         } catch (err) {
-            console.error("Failed to generate PDF", err);
-            alert("Ticket generation failed. Check console for details, or try a different browser.");
+            console.error("Failed to generate Ticket", err);
+            alert("Ticket generation failed. Check console for details.");
         } finally {
             setIsDownloading(false);
         }
@@ -167,8 +193,8 @@ export default function Stage5Ticket() {
                                 <tr>
                                     <td className="py-3 px-2 align-top font-mono text-gray-500 text-xs whitespace-nowrap" style={{ color: '#6b7280' }}>15:00 HRS</td>
                                     <td className="py-3 px-2">
-                                        <p className="font-bold text-gray-900 text-sm" style={{ color: '#111827' }}>Movies & Drinks</p>
-                                        <p className="text-gray-500 text-[10px] md:text-xs mt-0.5" style={{ color: '#6b7280' }}>Relaxation phase. Popcorn allocation mandatory.</p>
+                                        <p className="font-bold text-gray-900 text-sm" style={{ color: '#111827' }}>Drinks</p>
+                                        <p className="text-gray-500 text-[10px] md:text-xs mt-0.5" style={{ color: '#6b7280' }}>Relaxation phase. Popcorn allocation optional.</p>
                                     </td>
                                     <td className="py-3 px-2 text-right align-top">
                                         <span className="bg-purple-100 text-purple-800 text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase" style={{ backgroundColor: '#f3e8ff', color: '#6b21a8' }}>Scheduled</span>
