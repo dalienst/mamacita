@@ -266,7 +266,7 @@ export default function Stage5Ticket() {
             </div>
 
             {/* DOWNLOAD BUTTON */}
-            {/* <PDFDownloadLink
+            <PDFDownloadLink
                 document={<ValentineTicketPDF today={today} />}
                 fileName="Valentine_Event_Order_2026.pdf"
             >
@@ -286,7 +286,7 @@ export default function Stage5Ticket() {
                         </button>
                     )
                 }
-            </PDFDownloadLink> */}
+            </PDFDownloadLink>
         </div>
     );
 }

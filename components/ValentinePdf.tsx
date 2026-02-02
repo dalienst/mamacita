@@ -6,21 +6,13 @@ import {
     Text,
     View,
     StyleSheet,
-    Font,
-    Image as PDFImage, // rename to avoid conflict if needed
 } from "@react-pdf/renderer";
-import { useEffect, useState } from "react";
-
-// Optional: register a nicer font (Helvetica is default)
-// You can load custom fonts (TTF/OTF) like this:
-// Font.register({ family: 'Custom', src: '/fonts/YourFont.ttf' });
-// For now we'll use built-in Helvetica + some styling
 
 const styles = StyleSheet.create({
     page: {
         flexDirection: "column",
         backgroundColor: "#ffffff",
-        padding: 40, // roughly matches your p-6 md:p-14
+        padding: 40,
         fontFamily: "Helvetica",
     },
     header: {
@@ -35,12 +27,12 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
     },
     briefcaseBox: {
         backgroundColor: "#111827",
         padding: 8,
         borderRadius: 4,
+        marginRight: 12,
     },
     title: {
         fontSize: 24,
@@ -77,7 +69,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     column: {
-        flex: 1,
+        width: "48%",
     },
     label: {
         fontSize: 10,
@@ -115,31 +107,36 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
     },
     tableHeaderCell: {
-        flex: 1,
         fontSize: 10,
         fontWeight: "bold",
         color: "#4b5563",
         textTransform: "uppercase",
     },
-    tableHeaderTime: { flex: 0.8 },
-    tableHeaderStatus: { flex: 0.6, textAlign: "right" },
+    tableHeaderTime: {
+        width: "20%",
+    },
+    tableHeaderActivity: {
+        width: "60%",
+    },
+    tableHeaderStatus: {
+        width: "20%",
+        textAlign: "right",
+    },
     tableRow: {
         flexDirection: "row",
         borderBottomWidth: 1,
         borderBottomColor: "#e5e7eb",
         paddingVertical: 10,
         paddingHorizontal: 8,
-    },
-    tableCell: {
-        flex: 1,
-        fontSize: 11,
-        color: "#111827",
+        alignItems: "flex-start",
     },
     timeCell: {
-        flex: 0.8,
-        fontFamily: "Helvetica",
-        color: "#6b7280",
+        width: "20%",
         fontSize: 10,
+        color: "#6b7280",
+    },
+    activityCell: {
+        width: "60%",
     },
     activityTitle: {
         fontWeight: "bold",
@@ -150,6 +147,10 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: "#6b7280",
         marginTop: 2,
+    },
+    statusCell: {
+        width: "20%",
+        alignItems: "flex-end",
     },
     statusBadge: {
         paddingHorizontal: 8,
@@ -186,14 +187,12 @@ const styles = StyleSheet.create({
         paddingTop: 16,
     },
     signatureColumn: {
+        width: "48%",
         alignItems: "center",
-        flex: 1,
     },
     signatureName: {
-        fontFamily: "Helvetica", // or load a script font
-        fontSize: 32,
+        fontSize: 36,
         color: "#1e3a8a",
-        transform: "rotate(-2deg)",
         marginVertical: 8,
     },
     line: {
@@ -206,7 +205,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#374151",
     },
-    // Add more styles for stamps, watermarks, etc. as needed
+    stamp: {
+        position: "absolute",
+        top: 180,
+        left: 0,
+        right: 0,
+        textAlign: "center",
+        color: "rgba(220, 38, 38, 0.2)",
+        fontSize: 60,
+        fontWeight: "bold",
+        textTransform: "uppercase",
+        transform: "rotate(-12deg)",
+        borderWidth: 6,
+        borderColor: "rgba(220, 38, 38, 0.2)",
+        borderStyle: "solid",
+        paddingHorizontal: 40,
+        paddingVertical: 16,
+        alignSelf: "center",
+    },
 });
 
 interface TicketProps {
@@ -220,7 +236,6 @@ const ValentineTicketPDF = ({ today }: TicketProps) => (
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     <View style={styles.briefcaseBox}>
-                        {/* Replace icon with SVG or emoji or skip */}
                         <Text style={{ color: "#ffffff", fontSize: 20 }}>💼</Text>
                     </View>
                     <View>
@@ -265,27 +280,65 @@ const ValentineTicketPDF = ({ today }: TicketProps) => (
                 {/* Table Header */}
                 <View style={styles.tableHeader}>
                     <Text style={[styles.tableHeaderCell, styles.tableHeaderTime]}>Time (EAT)</Text>
-                    <Text style={styles.tableHeaderCell}>Activity / Module</Text>
+                    <Text style={[styles.tableHeaderCell, styles.tableHeaderActivity]}>Activity / Module</Text>
                     <Text style={[styles.tableHeaderCell, styles.tableHeaderStatus]}>Status</Text>
                 </View>
 
-                {/* Rows */}
+                {/* Row 1 - Bowling */}
                 <View style={styles.tableRow}>
                     <Text style={styles.timeCell}>11:00 HRS</Text>
-                    <View style={styles.tableCell}>
+                    <View style={styles.activityCell}>
                         <Text style={styles.activityTitle}>Bowling Championship</Text>
                         <Text style={styles.activityDesc}>Competitive module. Winner takes all.</Text>
                     </View>
-                    <View style={[styles.tableCell, { alignItems: "flex-end" }]}>
-                        <View style={[styles.statusBadge, { backgroundColor: "#dbeafe", color: "#1e40af" }]}>
-                            <Text>Booked</Text>
+                    <View style={styles.statusCell}>
+                        <View style={[styles.statusBadge, { backgroundColor: "#dbeafe" }]}>
+                            <Text style={{ color: "#1e40af" }}>Booked</Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Repeat similar blocks for other rows: Lunch, Drinks, Future Planning */}
-                {/* ... add the other 3 rows here following the same pattern ... */}
+                {/* Row 2 - Lunch */}
+                <View style={styles.tableRow}>
+                    <Text style={styles.timeCell}>13:00 HRS</Text>
+                    <View style={styles.activityCell}>
+                        <Text style={styles.activityTitle}>Lunch at Shaki</Text>
+                        <Text style={styles.activityDesc}>Refueling protocol. Cuisine exploration.</Text>
+                    </View>
+                    <View style={styles.statusCell}>
+                        <View style={[styles.statusBadge, { backgroundColor: "#dcfce7" }]}>
+                            <Text style={{ color: "#166534" }}>Confirmed</Text>
+                        </View>
+                    </View>
+                </View>
 
+                {/* Row 3 - Drinks */}
+                <View style={styles.tableRow}>
+                    <Text style={styles.timeCell}>15:00 HRS</Text>
+                    <View style={styles.activityCell}>
+                        <Text style={styles.activityTitle}>Drinks</Text>
+                        <Text style={styles.activityDesc}>Relaxation phase. Popcorn allocation optional.</Text>
+                    </View>
+                    <View style={styles.statusCell}>
+                        <View style={[styles.statusBadge, { backgroundColor: "#f3e8ff" }]}>
+                            <Text style={{ color: "#6b21a8" }}>Scheduled</Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Row 4 - Future Planning */}
+                <View style={styles.tableRow}>
+                    <Text style={styles.timeCell}>18:00 HRS</Text>
+                    <View style={styles.activityCell}>
+                        <Text style={styles.activityTitle}>Future Planning</Text>
+                        <Text style={styles.activityDesc}>Discussion of long-term roadmap.</Text>
+                    </View>
+                    <View style={styles.statusCell}>
+                        <View style={[styles.statusBadge, { backgroundColor: "#fef9c3" }]}>
+                            <Text style={{ color: "#854d0e" }}>Required</Text>
+                        </View>
+                    </View>
+                </View>
             </View>
 
             {/* Terms */}
@@ -296,22 +349,24 @@ const ValentineTicketPDF = ({ today }: TicketProps) => (
                 </Text>
             </View>
 
-            {/* Footer */}
-            <View style={styles.footer}>
-                <View style={styles.signatureColumn}>
-                    <Text style={styles.label}>Approved By (Sign Below)</Text>
-                    <Text style={styles.signatureName}>Baba</Text>
-                    <View style={styles.line} />
-                </View>
+            {/* Footer with simple stamp overlay */}
+            <View style={{ position: "relative" }}>
+                <Text style={styles.stamp}>AUTHORIZED</Text>
 
-                <View style={styles.signatureColumn}>
-                    <Text style={styles.label}>Date of Approval</Text>
-                    <Text style={styles.dateText}>{today}</Text>
-                    <View style={styles.line} />
+                <View style={styles.footer}>
+                    <View style={styles.signatureColumn}>
+                        <Text style={styles.label}>Approved By (Sign Below)</Text>
+                        <Text style={[styles.signatureName, { transform: "rotate(-2deg)" }]}>Baba</Text>
+                        <View style={styles.line} />
+                    </View>
+
+                    <View style={styles.signatureColumn}>
+                        <Text style={styles.label}>Date of Approval</Text>
+                        <Text style={styles.dateText}>{today}</Text>
+                        <View style={styles.line} />
+                    </View>
                 </View>
             </View>
-
-            {/* Optional watermark or stamp - can be absolute positioned View with low opacity */}
         </Page>
     </Document>
 );
