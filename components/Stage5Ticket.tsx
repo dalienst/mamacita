@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { domToPng } from "modern-screenshot";
 import jsPDF from "jspdf";
 import { Download, Briefcase, FileText, Loader2 } from "lucide-react";
+import ValentineTicketPDF from "./ValentinePdf";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 
 export default function Stage5Ticket() {
     const ticketRef = useRef<HTMLDivElement>(null);
@@ -264,23 +266,27 @@ export default function Stage5Ticket() {
             </div>
 
             {/* DOWNLOAD BUTTON */}
-            <button
-                onClick={downloadTicket}
-                disabled={isDownloading}
-                className="mt-8 md:mt-10 flex items-center gap-2 bg-gray-900 text-white font-bold py-3 px-6 md:px-8 rounded-full shadow-xl hover:bg-gray-800 transition-all transform hover:scale-105 text-sm md:text-base relative w-full sm:w-auto justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+            {/* <PDFDownloadLink
+                document={<ValentineTicketPDF today={today} />}
+                fileName="Valentine_Event_Order_2026.pdf"
             >
-                {isDownloading ? (
-                    <>
-                        <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
-                        <span>Generating Ticket...</span>
-                    </>
-                ) : (
-                    <>
-                        <Download className="w-4 h-4 md:w-5 md:h-5" />
-                        <span>Download Official Order (PDF)</span>
-                    </>
-                )}
-            </button>
+                {({ blob, url, loading, error }) =>
+                    loading ? (
+                        <button
+                            disabled
+                            className="mt-8 flex items-center gap-2 bg-gray-900 text-white font-bold py-3 px-6 rounded-full shadow-xl disabled:opacity-70"
+                        >
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Generating Ticket...
+                        </button>
+                    ) : (
+                        <button className="mt-8 flex items-center gap-2 bg-gray-900 text-white font-bold py-3 px-8 rounded-full shadow-xl hover:bg-gray-800 transition-all transform hover:scale-105">
+                            <Download className="w-5 h-5" />
+                            Download Official Order (PDF)
+                        </button>
+                    )
+                }
+            </PDFDownloadLink> */}
         </div>
     );
 }
